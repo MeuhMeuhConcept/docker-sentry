@@ -1,0 +1,2 @@
+# docker-sentry
+Sentry configuration
