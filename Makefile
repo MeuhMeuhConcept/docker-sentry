@@ -1,35 +1,11 @@
-.PHONY: help redis postgresql postfix sentry-port sentry-upgrade sentry-user sentry
+.PHONY: help sentry-upgrade sentry-user
 .DEFAULT_GOAL := help
 
-redis: ## Launch Redis container
-	docker run \
-		--detach \
-		--name sentry-redis \
-		--volume=$(shell pwd)/data/redis:/var/lib/redis:Z \
-		--restart=always \
-		redis \
-		--loglevel warning
-
-postgresql: ## Launch Postgresql container
-	docker run \
-		--detach \
-		--name sentry-postgresql \
-		--volume=$(shell pwd)/data/postgresql:/var/lib/postgresql:Z \
-		--restart=always \
-		--env-file=postgresql.env \
-		sameersbn/postgresql:9.6-2
+docker-compose.yml:
+	cp docker-compose.yml.dist $@
 
 postgresql.env:
 	cp postgresql.env.dist $@
-
-postfix: ## Launch Postfix container
-	docker run \
-		--detach \
-		--name sentry-postfix \
-		--restart=always \
-		--env-file=postfix.env \
-		--publish=25 \
-		catatnight/postfix
 
 postfix.env:
 	cp postfix.env.dist $@
@@ -43,70 +19,27 @@ sentry.secret: ## Generate sentry secret key
 sentry.env:
 	cp sentry.env.dist $@
 
-sentry.port:
-	cp sentry.port.dist $@
-
 sentry-upgrade: sentry.secret sentry.env ## Upgrade sentry if database is new
-	docker run \
+	docker exec \
 		--interactive \
 		--tty \
-		--rm \
-		--env-file=sentry.secret \
-		--env-file=sentry.env \
-		--link=sentry-postgresql:postgres \
-		--link=sentry-redis:redis \
-		sentry \
-		upgrade
+		sentry-sentry \
+		sentry upgrade
 
 sentry-user: sentry.secret sentry.env ## Configuring initial user
-	docker run \
+	docker exec \
 		--interactive \
 		--tty \
-		--rm \
-		--env-file=sentry.secret \
-		--env-file=sentry.env \
-		--link=sentry-postgresql:postgres \
-		--link=sentry-redis:redis \
-		sentry \
-		createuser
+		sentry-sentry \
+		sentry createuser
 
-sentry-worker:
-	docker run \
-		--detach \
-		--name sentry-worker \
-		--env-file=sentry.secret \
-		--env-file=sentry.env \
-		--link=sentry-postgresql:postgres \
-		--link=sentry-redis:redis \
-		--link=sentry-postfix:postfix \
-		sentry \
-		run worker
+install: postgresql.env postfix.env sentry.env docker-compose.yml ## Install project, create env files
 
-sentry-cron:
-	docker run \
-		--detach \
-		--name sentry-cron \
-		--env-file=sentry.secret \
-		--env-file=sentry.env \
-		--link=sentry-postgresql:postgres \
-		--link=sentry-redis:redis \
-		--link=sentry-postfix:postfix \
-		sentry \
-		run cron
+start: install ## Run the containers
+	docker-compose up -d
 
-sentry: sentry.secret sentry.env sentry.port ## Launch Sentry container
-	docker run \
-		--detach \
-		--name sentry-sentry \
-		--env-file=sentry.secret \
-		--env-file=sentry.env \
-		--link=sentry-postgresql:postgres \
-		--link=sentry-redis:redis \
-		--link=sentry-postfix:postfix \
-		--publish $(shell cat sentry.port):9000 \
-		sentry
-
-install: postgresql.env postfix.env sentry.env sentry.port ## Install project, create env files
+stop: install ## Stop the containers
+	docker-compose stop
 
 help:
 	@grep -E '^[a-zA-Z_-.]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

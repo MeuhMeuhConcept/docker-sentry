@@ -1,0 +1,66 @@
+version: '3.2'
+services:
+    redis:
+        container_name: sentry-redis
+        image: redis
+        volumes:
+            - '$PWD/data/redis:/var/lib/redis'
+        restart: always
+        deploy:
+            restart_policy:
+                condition: any
+
+    postgres:
+        container_name: sentry-postgresql
+        image: sameersbn/postgresql:9.6-2
+        volumes:
+            - '$PWD/data/postgresql:/var/lib/postgresql'
+        env_file: postgresql.env
+        restart: always
+        deploy:
+            restart_policy:
+                condition: any
+
+    postfix:
+        container_name: sentry-postfix
+        image: catatnight/postfix
+        env_file: postfix.env
+        deploy:
+            restart_policy:
+                condition: any
+
+    worker:
+        container_name: sentry-worker
+        image: sentry
+        command: ["run", "worker"]
+        env_file:
+            - sentry.secret
+            - sentry.env
+        restart: always
+        deploy:
+            restart_policy:
+                condition: any
+    cron:
+        container_name: sentry-cron
+        image: sentry
+        command: ["run", "cron"]
+        env_file:
+            - sentry.secret
+            - sentry.env
+        restart: always
+        deploy:
+            restart_policy:
+                condition: any
+
+    sentry:
+        container_name: sentry-sentry
+        image: sentry
+        env_file:
+            - sentry.secret
+            - sentry.env
+        ports:
+            - "9000:9000"
+        restart: always
+        deploy:
+            restart_policy:
+                condition: any

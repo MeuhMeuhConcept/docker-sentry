@@ -4,3 +4,4 @@ postfix.env
 sentry.env
 sentry.secret
 sentry.port
+docker-compose.yml

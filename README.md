@@ -11,25 +11,22 @@ Edit following files to configure your sentry platform :
 * postgresql.env
 * sentry.env
 * sentry.port
+* docker-composer.yml
 
-## Launch dependencies containers
+## Launch containers
 ```
-make redis postgresql postfix
+make start
 ```
 
 ## Upgrade your database
+In the first launch
 ```
 make sentry-upgrade
 ```
 
-## Create user (if noo already done in previous step)
+## Create user (if not already done in previous step)
 ```
 make sentry-user
-```
-
-## Launch sentry containers
-```
-make sentry sentry-cron sentry-worker
 ```
 
 ## Bonus
