@@ -12,15 +12,14 @@ services:
 
     postgres:
         container_name: sentry-postgresql
-        image: sameersbn/postgresql:9.6-2
+        image: meuhmeuhconcept/postgres
         volumes:
-            - '$PWD/data/postgresql:/var/lib/postgresql'
+            -  '/var/lib/postgresql/data/pgdata'
         environment:
-            - DB_USER
-            - DB_PASS
-            - DB_NAME
-            - DB_EXTENSION
-        restart: always
+            - POSTGRES_DB
+            - POSTGRES_USER
+            - POSTGRES_PASSWORD
+            - PGDATA
         deploy:
             restart_policy:
                 condition: any
