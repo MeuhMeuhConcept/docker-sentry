@@ -1,7 +1,3 @@
 data/
-postgresql.env
-postfix.env
-sentry.env
-sentry.secret
-sentry.port
 docker-compose.yml
+.env

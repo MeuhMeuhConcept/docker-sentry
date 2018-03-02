@@ -15,7 +15,11 @@ services:
         image: sameersbn/postgresql:9.6-2
         volumes:
             - '$PWD/data/postgresql:/var/lib/postgresql'
-        env_file: postgresql.env
+        environment:
+            - DB_USER
+            - DB_PASS
+            - DB_NAME
+            - DB_EXTENSION
         restart: always
         deploy:
             restart_policy:
@@ -24,7 +28,9 @@ services:
     postfix:
         container_name: sentry-postfix
         image: catatnight/postfix
-        env_file: postfix.env
+        environment:
+            - maildomain
+            - smtp_user
         deploy:
             restart_policy:
                 condition: any
@@ -33,9 +39,18 @@ services:
         container_name: sentry-worker
         image: sentry
         command: ["run", "worker"]
-        env_file:
-            - sentry.secret
-            - sentry.env
+        environment:
+            - SENTRY_DB_USER
+            - SENTRY_DB_PASSWORD
+            - SENTRY_DB_NAME
+            - SENTRY_SERVER_EMAIL
+            - SENTRY_EMAIL_HOST
+            - SENTRY_EMAIL_USER
+            - SENTRY_EMAIL_PASSWORD
+            - SENTRY_EMAIL_PORT
+            - SENTRY_REDIS_HOST
+            - SENTRY_POSTGRES_HOST
+            - SENTRY_SECRET_KEY
         restart: always
         deploy:
             restart_policy:
@@ -44,9 +59,18 @@ services:
         container_name: sentry-cron
         image: sentry
         command: ["run", "cron"]
-        env_file:
-            - sentry.secret
-            - sentry.env
+        environment:
+            - SENTRY_DB_USER
+            - SENTRY_DB_PASSWORD
+            - SENTRY_DB_NAME
+            - SENTRY_SERVER_EMAIL
+            - SENTRY_EMAIL_HOST
+            - SENTRY_EMAIL_USER
+            - SENTRY_EMAIL_PASSWORD
+            - SENTRY_EMAIL_PORT
+            - SENTRY_REDIS_HOST
+            - SENTRY_POSTGRES_HOST
+            - SENTRY_SECRET_KEY
         restart: always
         deploy:
             restart_policy:
@@ -55,9 +79,18 @@ services:
     sentry:
         container_name: sentry-sentry
         image: sentry
-        env_file:
-            - sentry.secret
-            - sentry.env
+        environment:
+            - SENTRY_DB_USER
+            - SENTRY_DB_PASSWORD
+            - SENTRY_DB_NAME
+            - SENTRY_SERVER_EMAIL
+            - SENTRY_EMAIL_HOST
+            - SENTRY_EMAIL_USER
+            - SENTRY_EMAIL_PASSWORD
+            - SENTRY_EMAIL_PORT
+            - SENTRY_REDIS_HOST
+            - SENTRY_POSTGRES_HOST
+            - SENTRY_SECRET_KEY
         ports:
             - "9000:9000"
         restart: always
