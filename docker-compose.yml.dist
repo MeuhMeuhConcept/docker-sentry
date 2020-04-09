@@ -14,7 +14,9 @@ services:
         container_name: sentry-postgresql
         image: meuhmeuhconcept/postgres
         volumes:
-            -  '/var/lib/postgresql/data/pgdata'
+            - type: volume #To persist datas
+                source: sentry_data
+                target: "/var/lib/postgresql/data/pgdata"
         environment:
             - POSTGRES_DB
             - POSTGRES_USER
@@ -96,3 +98,6 @@ services:
         deploy:
             restart_policy:
                 condition: any
+
+volumes:
+    sentry_data:
